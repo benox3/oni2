@@ -15,8 +15,8 @@ let start = () => {
   let (stream, dispatch) = Isolinear.Stream.create();
 
   let position = (selectedItem, change, count) => {
-    let nextIndex = selectedItem + change;
-    nextIndex >= count || nextIndex < 0 ? 0 : nextIndex;
+    let nextSelectedItem = count > 0 ? (selectedItem + change) mod count : 0;
+    nextSelectedItem >= 0 ? nextSelectedItem : count;
   };
 
   let menuOpenEffect = (menuConstructor, onQueryChangedEvent) =>
@@ -57,19 +57,24 @@ let start = () => {
         {...state, selectedItem: index},
         Isolinear.Effect.none,
       )
-    | MenuPreviousItem => (
+    | MenuPreviousItem =>
+      let itemToSelect = position(state.selectedItem, - 1, filteredCommandsCount);
+      let newRowOffset = state.rowOffset - 1 < 0 ? filteredCommandsCount mod state.maxRows: state.rowOffset - 1;
+      (
         {
           ...state,
-          selectedItem:
-            position(state.selectedItem, -1, filteredCommandsCount),
+          selectedItem:  state.selectedItem - 1 < 0 ? filteredCommandsCount - 1 : itemToSelect,
+          rowOffset: state.selectedItem - 1 < state.rowOffset ? newRowOffset : state.rowOffset,
         },
         Isolinear.Effect.none,
       )
-    | MenuNextItem => (
+    | MenuNextItem =>
+      let itemToSelect = position(state.selectedItem, 1, filteredCommandsCount);
+      (
         {
           ...state,
-          selectedItem:
-            position(state.selectedItem, 1, filteredCommandsCount),
+          selectedItem: itemToSelect,
+          rowOffset: state.selectedItem + 1 >= state.maxRows ? state.rowOffset + 1 : 0,
         },
         Isolinear.Effect.none,
       )
@@ -79,8 +84,7 @@ let start = () => {
           searchQuery: query,
           filterJob:
             Core.Job.mapw(MenuJob.updateQuery(query), state.filterJob),
-          selectedItem:
-            position(state.selectedItem, 0, filteredCommandsCount),
+          selectedItem: 0
         },
         queryChangedEffect(state.onQueryChanged, query),
       )

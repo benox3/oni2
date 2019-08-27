@@ -11,9 +11,11 @@ type t = {
    */
   isLoading: bool,
   selectedItem: int,
+  rowOffset: int,
   filterJob: MenuJob.t,
   onQueryChanged: Event.t(string),
   dispose: unit => unit,
+  maxRows: int
 };
 
 let create = () => {
@@ -21,6 +23,8 @@ let create = () => {
   isOpen: false,
   isLoading: false,
   selectedItem: 0,
+  rowOffset: 0,
+  maxRows: 8,
   filterJob: MenuJob.create(),
   onQueryChanged: Event.create(),
   dispose: () => (),

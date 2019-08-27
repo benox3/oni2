@@ -6,7 +6,7 @@ open Oni_Model;
 let component = React.component("Menu");
 
 let menuWidth = 400;
-let menuHeight = 320;
+let menuRowHeight = 40;
 
 let containerStyles = (theme: Theme.t) =>
   Style.[
@@ -111,8 +111,9 @@ let createElement =
                 </View>
                 <View>
                   <FlatList
-                    rowHeight=40
-                    height=menuHeight
+                    scrollY={float_of_int(menuRowHeight * menu.rowOffset)}
+                    rowHeight=menuRowHeight
+                    height={menuRowHeight * menu.maxRows}
                     width=menuWidth
                     count={Array.length(commands)}
                     render={index => {
@@ -121,7 +122,7 @@ let createElement =
                         onClick
                         theme
                         style=menuItemStyle
-                        label={getLabel(cmd)}
+                        label={getLabel(cmd) ++ string_of_int(menu.rowOffset) ++ " selecteditem" ++ string_of_int(menu.selectedItem)}
                         icon={cmd.icon}
                         onMouseOver={_ => onMouseOver(index)}
                         selected={index == menu.selectedItem}
